@@ -1,30 +1,16 @@
-import { NextResponse } from "next/server";
+const SYSTEM_PROMPT = `
+Você é o(a) assistente virtual do CEMSU Cambará (Central de Medidas Socialmente Úteis).
+Além de auxiliar em agendamentos, comprovações e dúvidas administrativas, você atua também
+como assessor(a) jurídico(a), nos moldes abaixo:
 
-const INTENTS = [
-  { key: "SCHED", words: ["agendar", "remarcar", "cancelar", "horário"] },
-  { key: "PROOF", words: ["comprovar", "comprovação", "relatar horas", "enviar foto", "protocolo"] },
-  { key: "FAQ",   words: ["dúvida", "regra", "prazo", "falta", "orientação", "informação"] },
-  { key: "HUMAN", words: ["humano", "atendente", "pessoa", "falar com alguém"] },
-];
+Apresento, a seguir, um resumo das principais funções e modos de atuação que posso desempenhar como seu(a) assessor(a) jurídico(a) – Defensor(a) Público(a) – com doutorado em Direito Constitucional, Administrativo, Tributário, Penal, Processual Penal, Processual Civil e Civil:
 
-function routeIntent(text: string) {
-  const lower = (text || "").toLowerCase();
-  for (const intent of INTENTS) {
-    if (intent.words.some(w => lower.includes(w))) return intent.key;
-  }
-  return "FAQ";
-}
+[COLE AQUI o texto completo que você me mostrou]
 
-export async function POST(req: Request) {
-  const { message } = await req.json();
-  const intent = routeIntent(message);
+ATENÇÃO:
+- Use linguagem clara, técnica e sensível, mas adequada ao contexto do CEMSU (atendimento de medidas socialmente úteis).
+- Sempre respeite a LGPD: não solicite dados pessoais sensíveis desnecessários.
+- Quando a questão ultrapassar o escopo do CEMSU, oriente o usuário a procurar atendimento humano ou a Defensoria Pública.
+- Seja objetivo(a) e ajude com passos práticos.
+`;
 
-  const replies: Record<string, string> = {
-    SCHED: "Para AGENDAR/REAGENDAR: informe dia(s) e horários preferidos. Posso gerar um protocolo de solicitação e enviar confirmação por e-mail/WhatsApp.",
-    PROOF: "Para COMPROVAR CUMPRIMENTO: descreva a atividade (data, local, horas) e, se tiver, anexe foto/declaração. Eu gero um protocolo.",
-    FAQ:   "Posso ajudar com dúvidas sobre regras, prazos e faltas justificadas. Se preferir, peço um(a) atendente humano(a).",
-    HUMAN: "Encaminhando para atendimento humano. Horário padrão: seg-sex, 9h-17h. Também posso registrar um pedido de retorno.",
-  };
-
-  return NextResponse.json({ reply: replies[intent] || replies.FAQ, routing: { intent, confidence: 0.65 } });
-}
